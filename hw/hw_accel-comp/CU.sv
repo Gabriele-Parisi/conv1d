@@ -19,8 +19,8 @@ typedef enum {
   STATE_14,
   STATE_14b,
   STATE_15,
-  IDLE
-} state;
+  IDLE_hw_acc
+} state_cu_t;
 
 module CU (
   input logic clk,
@@ -61,11 +61,11 @@ module CU (
   output logic [1:0] mux_addr_sel
 );
 
-  state cur_state, next_state;
+  state_cu_t cur_state, next_state;
 
   always @(posedge clk or negedge rst_n) begin
     if (!rst_n) begin
-      cur_state <= IDLE;
+      cur_state <= IDLE_hw_acc;
     end else begin
       cur_state <= next_state;
     end
@@ -104,8 +104,8 @@ module CU (
     ext_sel                = 1'b0;
 
     case (cur_state)
-      IDLE: begin  //running=0, don't touch done, because we would not reset it at the second run
-        next_state             = start ? STATE_0 : IDLE;
+      IDLE_hw_acc: begin  //running=0, don't touch done, because we would not reset it at the second run
+        next_state             = start ? STATE_0 : IDLE_hw_acc;
         mem_req                = 1'b0;
         mem_we                 = 1'b0;
 
@@ -268,7 +268,7 @@ module CU (
       end
 
       STATE_15: begin  //done=1, running=0
-        next_state = IDLE;
+        next_state = IDLE_hw_acc;
         done       = 1'b1;
         done_e     = 1'b1;
         running    = 1'b0;
@@ -276,7 +276,7 @@ module CU (
       end
 
       default: begin
-        next_state = IDLE;
+        next_state = IDLE_hw_acc;
       end
     endcase
   end
